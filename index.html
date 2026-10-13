@@ -1,0 +1,614 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="An interactive Computer Networks project demonstrating Dijkstra's shortest path algorithm on a weighted network graph.">
+    <title>Shortest Path Route Simulator</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <header class="navbar">
+        <a href="#home" class="logo">
+            <span class="logo-icon">SP</span>
+            <span>Route<span class="logo-highlight">Sim</span></span>
+        </a>
+
+        <nav class="nav-links" aria-label="Main navigation">
+            <a href="#home">Home</a>
+            <a href="#simulator">Simulator</a>
+            <a href="#algorithm">Algorithm</a>
+            <a href="#about">About</a>
+        </nav>
+
+        <button id="themeToggle" class="theme-toggle"
+                type="button" aria-label="Toggle dark and light theme">
+            🌙
+        </button>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="hero section">
+            <div class="hero-content">
+                <span class="eyebrow">COMPUTER NETWORKS · PCCO302</span>
+
+                <h1>
+                    Find the <span class="highlight">Shortest Path.</span><br>
+                    Understand Every Step.
+                </h1>
+
+                <p>
+                    Explore how Dijkstra's algorithm finds the lowest-cost
+                    route between network devices through an interactive
+                    weighted graph.
+                </p>
+
+                <div class="hero-actions">
+                    <a href="#simulator" class="btn btn-primary">
+                        Explore Simulator ↗
+                    </a>
+                    <a href="#algorithm" class="btn btn-secondary">
+                        Learn the Algorithm
+                    </a>
+                </div>
+
+                <div class="hero-stats">
+                    <div>
+                        <strong>Dijkstra</strong>
+                        <span>Algorithm</span>
+                    </div>
+                    <div>
+                        <strong>O(V²)</strong>
+                        <span>Time Complexity</span>
+                    </div>
+                    <div>
+                        <strong>Weighted</strong>
+                        <span>Network Graph</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-visual">
+                <div class="visual-label">
+                    <span class="status-dot"></span>
+                    NETWORK PREVIEW
+                </div>
+
+                <svg id="heroGraph" viewBox="0 0 420 290"
+                     role="img"
+                     aria-label="Preview of a network graph with four connected nodes">
+                    <line x1="75" y1="75" x2="205" y2="45" class="hero-edge"/>
+                    <line x1="75" y1="75" x2="115" y2="215" class="hero-edge"/>
+                    <line x1="205" y1="45" x2="330" y2="125" class="hero-edge"/>
+                    <line x1="115" y1="215" x2="330" y2="125" class="hero-edge"/>
+
+                    <text x="140" y="45" class="edge-label">2</text>
+                    <text x="75" y="150" class="edge-label">4</text>
+                    <text x="275" y="72" class="edge-label">3</text>
+                    <text x="225" y="185" class="edge-label">1</text>
+
+                    <circle cx="75" cy="75" r="23" class="hero-node"/>
+                    <circle cx="205" cy="45" r="23" class="hero-node"/>
+                    <circle cx="115" cy="215" r="23" class="hero-node"/>
+                    <circle cx="330" cy="125" r="23" class="hero-node"/>
+
+                    <text x="75" y="80" class="node-label">A</text>
+                    <text x="205" y="50" class="node-label">B</text>
+                    <text x="115" y="220" class="node-label">C</text>
+                    <text x="330" y="130" class="node-label">D</text>
+                </svg>
+
+                <div class="visual-footer">
+                    <span>4 Network Nodes</span>
+                    <span>4 Connections</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Simulator Section -->
+        <section id="simulator" class="section simulator-section">
+            <div class="section-heading">
+                <span class="eyebrow">INTERACTIVE LAB</span>
+                <h2>Shortest Path Simulator</h2>
+                <p>
+                    Configure your network, select the source and destination,
+                    and watch the algorithm find the minimum-cost route.
+                </p>
+            </div>
+
+            <div class="simulator-layout">
+
+                <!-- Graph Panel -->
+                <div class="panel graph-panel">
+                    <div class="panel-header">
+                        <div>
+                            <h3>Network Graph</h3>
+                            <p>Nodes represent devices; edges represent links.</p>
+                        </div>
+                        <span id="graphStatus" class="status-badge">
+                            Ready
+                        </span>
+                    </div>
+
+                    <div class="graph-legend">
+                        <span><i class="legend-node"></i> Device</span>
+                        <span><i class="legend-source"></i> Source</span>
+                        <span><i class="legend-destination"></i> Destination</span>
+                        <span><i class="legend-path"></i> Shortest path</span>
+                    </div>
+
+                    <div class="graph-container">
+                        <svg id="networkGraph" viewBox="0 0 600 380"
+                             role="img"
+                             aria-label="Interactive weighted network graph">
+                            <!-- Connections and nodes are generated by graph.js -->
+                        </svg>
+                    </div>
+
+                    <div class="graph-hint">
+                        Tip: Click a connection to edit its cost or break it.
+                    </div>
+
+                    <div class="graph-actions">
+                        <button id="resetGraphBtn" class="btn btn-secondary"
+                                type="button">
+                            Reset Network
+                        </button>
+                        <button id="addNodeBtn" class="btn btn-secondary"
+                                type="button">
+                            + Add Node
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Controls Panel -->
+                <div class="panel controls-panel">
+                    <div class="panel-header">
+                        <div>
+                            <h3>Route Configuration</h3>
+                            <p>Choose where the packet starts and ends.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sourceNode">Source Device</label>
+                        <select id="sourceNode">
+                            <option value="A">Node A</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="destinationNode">Destination Device</label>
+                        <select id="destinationNode">
+                            <option value="D">Node D</option>
+                        </select>
+                    </div>
+
+                    <div class="control-buttons">
+                        <button id="runBtn" class="btn btn-primary"
+                                type="button">
+                            ▶ Run Algorithm
+                        </button>
+                        <button id="stepBtn" class="btn btn-secondary"
+                                type="button">
+                            Step-by-Step →
+                        </button>
+                    </div>
+
+                    <button id="resetBtn" class="btn btn-text"
+                            type="button">
+                        ↻ Reset Simulation
+                    </button>
+
+                    <div class="divider"></div>
+
+                    <div class="result-heading">
+                        <h3>Route Results</h3>
+                        <span id="resultStatus">Not started</span>
+                    </div>
+
+                    <div class="result-card">
+                        <span class="result-label">SHORTEST PATH</span>
+                        <div id="shortestPath" class="result-value">
+                            —
+                        </div>
+                    </div>
+
+                    <div class="result-metrics">
+                        <div class="metric-card">
+                            <span class="result-label">TOTAL COST</span>
+                            <strong id="totalCost">—</strong>
+                        </div>
+                        <div class="metric-card">
+                            <span class="result-label">NODES VISITED</span>
+                            <strong id="nodesVisited">0</strong>
+                        </div>
+                    </div>
+
+                    <div id="simulationMessage" class="simulation-message"
+                         role="status" aria-live="polite">
+                        Select your route and run the algorithm.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Algorithm Progress -->
+            <div class="panel progress-panel">
+                <div class="panel-header">
+                    <div>
+                        <h3>Algorithm Progress</h3>
+                        <p>Follow how the minimum distances change.</p>
+                    </div>
+                    <span id="stepCounter" class="status-badge">Step 0</span>
+                </div>
+
+                <div class="progress-track">
+                    <div id="progressBar" class="progress-bar"></div>
+                </div>
+
+                <div id="stepExplanation" class="step-explanation">
+                    The algorithm has not started yet.
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Node</th>
+                                <th>Distance from Source</th>
+                                <th>Previous Node</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="distanceTable">
+                            <tr>
+                                <td colspan="4" class="empty-table">
+                                    Run the algorithm to view distances.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- How it Works -->
+        <section id="algorithm" class="section">
+            <div class="section-heading">
+                <span class="eyebrow">THE PROCESS</span>
+                <h2>How Dijkstra's Algorithm Works</h2>
+                <p>
+                    The algorithm repeatedly selects the unvisited node
+                    with the smallest known distance.
+                </p>
+            </div>
+
+            <div class="steps-grid">
+                <article class="step-card">
+                    <span class="step-number">01</span>
+                    <h3>Initialize</h3>
+                    <p>
+                        Set the source distance to 0 and every other
+                        node's distance to infinity.
+                    </p>
+                </article>
+
+                <article class="step-card">
+                    <span class="step-number">02</span>
+                    <h3>Select</h3>
+                    <p>
+                        Select the unvisited node with the smallest
+                        tentative distance.
+                    </p>
+                </article>
+
+                <article class="step-card">
+                    <span class="step-number">03</span>
+                    <h3>Update</h3>
+                    <p>
+                        Check its neighbors and update their distances
+                        when a cheaper route is found.
+                    </p>
+                </article>
+
+                <article class="step-card">
+                    <span class="step-number">04</span>
+                    <h3>Reconstruct</h3>
+                    <p>
+                        Repeat until the destination is reached, then
+                        trace previous nodes to display the route.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <!-- System Design -->
+        <section id="system-design" class="section system-section">
+            <div class="section-heading">
+                <span class="eyebrow">SYSTEM DESIGN</span>
+                <h2>From Input to Shortest Route</h2>
+                <p>The main stages of our network routing simulator.</p>
+            </div>
+
+            <div class="flow-diagram">
+                <div class="flow-item">
+                    <span class="flow-icon">⌨</span>
+                    <strong>User Input</strong>
+                    <span>Source, destination, link costs</span>
+                </div>
+
+                <span class="flow-arrow" aria-hidden="true">→</span>
+
+                <div class="flow-item">
+                    <span class="flow-icon">◉</span>
+                    <strong>Weighted Graph</strong>
+                    <span>Devices and connections</span>
+                </div>
+
+                <span class="flow-arrow" aria-hidden="true">→</span>
+
+                <div class="flow-item">
+                    <span class="flow-icon">⚙</span>
+                    <strong>Dijkstra's Algorithm</strong>
+                    <span>Calculate minimum distances</span>
+                </div>
+
+                <span class="flow-arrow" aria-hidden="true">→</span>
+
+                <div class="flow-item">
+                    <span class="flow-icon">✓</span>
+                    <strong>Route Output</strong>
+                    <span>Shortest path and total cost</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Algorithm Details -->
+        <section id="complexity" class="section">
+            <div class="section-heading">
+                <span class="eyebrow">ALGORITHM DETAILS</span>
+                <h2>The Logic Behind the Route</h2>
+                <p>
+                    This implementation follows the basic Dijkstra
+                    approach described in our project report.
+                </p>
+            </div>
+
+            <div class="details-grid">
+                <div class="panel pseudocode-panel">
+                    <h3>Pseudocode</h3>
+                    <pre><code>DIJKSTRA(graph, source, destination)
+
+1. Set distance[source] = 0
+2. Set all other distances = infinity
+3. Mark all nodes as unvisited
+
+4. While an unvisited node exists:
+   a. Select the node with minimum distance
+   b. Mark the node as visited
+   c. For each unvisited neighbor:
+      newDistance = currentDistance + edgeCost
+      If newDistance is smaller:
+          Update distance
+          Store previous node
+
+5. Reconstruct path from destination
+   using previous nodes
+
+6. Display path and total cost</code></pre>
+                </div>
+
+                <div class="panel complexity-panel">
+                    <h3>Complexity Analysis</h3>
+
+                    <div class="complexity-item">
+                        <span>Time Complexity</span>
+                        <strong>O(V²)</strong>
+                        <p>
+                            Basic implementation that repeatedly searches
+                            for the unvisited node with minimum distance.
+                        </p>
+                    </div>
+
+                    <div class="complexity-item">
+                        <span>Space Complexity</span>
+                        <strong>O(V²)</strong>
+                        <p>
+                            For an adjacency-matrix graph representation,
+                            along with distance and visited arrays.
+                        </p>
+                    </div>
+
+                    <p class="small-note">
+                        V = number of vertices (network devices).
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Future Scope -->
+        <section id="future-scope" class="section future-section">
+            <div class="section-heading">
+                <span class="eyebrow">FUTURE SCOPE</span>
+                <h2>What Can Be Improved Next?</h2>
+                <p>
+                    Future extensions identified in the project report.
+                </p>
+            </div>
+
+            <div class="future-grid">
+                <article class="future-card">
+                    <span>＋</span>
+                    <h3>Dynamic Networks</h3>
+                    <p>Add devices and modify connection costs dynamically.</p>
+                </article>
+
+                <article class="future-card">
+                    <span>⌁</span>
+                    <h3>Graph Visualization</h3>
+                    <p>Improve visual exploration of devices and routes.</p>
+                </article>
+
+                <article class="future-card">
+                    <span>⇄</span>
+                    <h3>Algorithm Comparison</h3>
+                    <p>Compare Dijkstra with other routing algorithms.</p>
+                </article>
+
+                <article class="future-card">
+                    <span>⚡</span>
+                    <h3>Network Failures</h3>
+                    <p>Simulate broken links and changes in network topology.</p>
+                </article>
+            </div>
+        </section>
+
+        <!-- About and Team -->
+        <section id="about" class="section about-section">
+            <div class="section-heading">
+                <span class="eyebrow">PROJECT INFORMATION</span>
+                <h2>About the Project</h2>
+                <p>
+                    An educational simulator demonstrating shortest-path
+                    routing concepts in computer networks.
+                </p>
+            </div>
+
+            <div class="about-grid">
+                <div class="panel project-info">
+                    <h3>Project Details</h3>
+
+                    <div class="info-row">
+                        <span>Project Title</span>
+                        <strong>Shortest Path Route Simulator</strong>
+                    </div>
+
+                    <div class="info-row">
+                        <span>Subject</span>
+                        <strong>Computer Networks — PCCO302</strong>
+                    </div>
+
+                    <div class="info-row">
+                        <span>Department</span>
+                        <strong>Computer Engineering</strong>
+                    </div>
+
+                    <div class="info-row">
+                        <span>Class</span>
+                        <strong>TY B.Tech, Semester V</strong>
+                    </div>
+
+                    <div class="info-row">
+                        <span>Academic Year</span>
+                        <strong>2026–27</strong>
+                    </div>
+
+                    <div class="info-row">
+                        <span>Institute</span>
+                        <strong>Sanjivani College of Engineering</strong>
+                    </div>
+
+                    <div class="info-row">
+                        <span>Course In-charge</span>
+                        <strong>Dr. P. N. Kalavadekar</strong>
+                    </div>
+                </div>
+
+                <div class="panel team-panel">
+                    <h3>Project Team</h3>
+
+                    <div class="team-member">
+                        <span class="member-number">31</span>
+                        <div>
+                            <strong>Shaikh Alfiya Ramjan</strong>
+                            <span>Team Member</span>
+                        </div>
+                    </div>
+
+                    <div class="team-member">
+                        <span class="member-number">32</span>
+                        <div>
+                            <strong>Pathan Sayma Riyaz</strong>
+                            <span>Team Member</span>
+                        </div>
+                    </div>
+
+                    <div class="team-member">
+                        <span class="member-number">34</span>
+                        <div>
+                            <strong>Kandalkar Shraddha Balasaheb</strong>
+                            <span>Team Member</span>
+                        </div>
+                    </div>
+
+                    <div class="team-member">
+                        <span class="member-number">36</span>
+                        <div>
+                            <strong>Waghmare Rutuja Subhash</strong>
+                            <span>Team Member</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- References -->
+        <section id="references" class="section references-section">
+            <div class="section-heading">
+                <span class="eyebrow">REFERENCES</span>
+                <h2>Learning Resources</h2>
+                <p>References listed in the project report.</p>
+            </div>
+
+            <ol class="reference-list">
+                <li>
+                    Tanenbaum, A. S., and Wetherall, D. J.
+                    <em>Computer Networks.</em>
+                </li>
+                <li>
+                    Forouzan, B. A.
+                    <em>Data Communications and Networking.</em>
+                </li>
+                <li>
+                    Kurose, J. F., and Ross, K. W.
+                    <em>Computer Networking: A Top-Down Approach.</em>
+                </li>
+                <li>
+                    Dijkstra, E. W. (1959).
+                    <em>A Note on Two Problems in Connexion with Graphs.</em>
+                </li>
+                <li>
+                    Python Documentation.
+                </li>
+                <li>
+                    Computer Networks course syllabus, PCCO302.
+                </li>
+            </ol>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <a href="#home" class="logo">
+            <span class="logo-icon">SP</span>
+            <span>Route<span class="logo-highlight">Sim</span></span>
+        </a>
+
+        <p>
+            Shortest Path Route Simulator · Computer Networks · PCCO302
+        </p>
+
+        <a href="#home" class="back-to-top">Back to top ↑</a>
+    </footer>
+
+    <!-- JavaScript files -->
+    <script src="js/graph.js"></script>
+    <script src="js/dijkstra.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
